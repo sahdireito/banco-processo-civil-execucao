@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banco de Questões — Processo de Execução</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f4f1eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#222;line-height:1.55;padding:24px 16px 60px}
+.wrap{max-width:860px;margin:0 auto}
+.badge{display:inline-block;background:#1a2a4a;color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;border-radius:8px;margin-bottom:14px}
+h1{font-size:26px;color:#1a2a4a;margin-bottom:4px}
+.sub{color:#6b6b6b;font-size:14px;margin-bottom:20px}
+.stats{background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px}
+.srow{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:12px}
+.st{display:flex;flex-direction:column}
+.st b{font-size:24px;color:#1a2a4a}
+.st.ok b{color:#2e7d32}.st.no b{color:#c62828}
+.st span{font-size:12px;color:#777;text-transform:uppercase;letter-spacing:.04em}
+.bar{height:8px;background:#e8e4da;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#1a2a4a;transition:width .3s}
+.ptxt{font-size:12px;color:#777;margin-top:6px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.nav button{width:38px;height:38px;border:1px solid #ddd6c8;background:#ece8df;border-radius:8px;font-weight:700;color:#555;cursor:pointer;font-size:13px}
+.nav button.act{background:#1a2a4a;color:#fff;border-color:#1a2a4a}
+.nav button.ok{background:#dff0e0;border-color:#9cc9a0;color:#2e7d32}
+.nav button.no{background:#fbe1e1;border-color:#e6a3a3;color:#c62828}
+.nav button.act.ok,.nav button.act.no{outline:3px solid #1a2a4a;outline-offset:1px}
+.qc{display:none;background:#fff;border-radius:14px;padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.qc.vis{display:block}
+.qh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.qtag{background:#dfe9f7;color:#1a2a4a;font-weight:700;font-size:12px;padding:4px 10px;border-radius:6px}
+.qex{color:#777;font-size:12.5px}
+.qt{font-weight:700;color:#1a2a4a;font-size:15px;margin:8px 0 10px}
+.en{background:#f7f5f0;border-left:4px solid #1a2a4a;padding:12px 14px;border-radius:0 8px 8px 0;margin-bottom:10px;font-size:15px}
+.cm{font-weight:600;margin-bottom:12px;font-size:15px}
+.alt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:#fff;border:1.5px solid #e2ddd2;border-radius:10px;padding:11px 14px;margin-bottom:8px;cursor:pointer;font-size:14.5px;color:#222;font-family:inherit;line-height:1.5}
+.alt:hover:not(:disabled){border-color:#1a2a4a}
+.alt .lt{flex:0 0 28px;height:28px;border-radius:50%;background:#ece8df;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a2a4a}
+.alt:disabled{cursor:default}
+.alt.cor{background:#e5f4e6;border-color:#66bb6a}.alt.cor .lt{background:#2e7d32;color:#fff}
+.alt.err{background:#fde8e8;border-color:#ef9a9a}.alt.err .lt{background:#c62828;color:#fff}
+.fb{display:none;margin-top:12px;padding:12px 14px;border-radius:10px;font-size:14px}
+.fb.ok{display:block;background:#e5f4e6;color:#1b5e20}
+.fb.no{display:block;background:#fde8e8;color:#8e1c1c}
+.acts{display:none;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.acts.on{display:flex}
+.b1,.b2,.b3{font-family:inherit;font-size:13.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;background:#fff}
+.b1{border:1.5px solid #1a2a4a;color:#1a2a4a}
+.b2{border:1.5px solid #d48a1a;color:#a8650a}
+.b3{border:1.5px solid #bbb;color:#555}
+.gab{margin-left:auto;font-size:13px;color:#555}
+.gab b{color:#1a2a4a;font-size:15px}
+.fu{display:none;margin-top:12px;background:#d8e2f0;border-radius:10px;padding:12px 14px;font-size:14px}
+.ca{display:none;margin-top:12px;background:#fff8e6;border-left:4px solid #e0a12b;border-radius:0 10px 10px 0;padding:12px 14px;font-size:14px}
+.fu.on,.ca.on{display:block}
+.fu h4{color:#1a2a4a;margin-bottom:6px;font-size:14px}
+.ca h4{color:#a8650a;margin-bottom:6px;font-size:14px}
+.pager{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.pager button{font-family:inherit;background:#1a2a4a;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:600;cursor:pointer;font-size:14px}
+.pager button:disabled{background:#b9b4aa;cursor:default}
+.pager span{color:#666;font-size:14px}
+.foot{text-align:center;color:#999;font-size:12px;margin-top:28px}
+@media(max-width:560px){h1{font-size:21px}.qc{padding:16px}.gab{margin-left:0;width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="badge">📌 Banco de Questões OAB · Processo Civil</div>
+<h1>Processo de Execução</h1>
+<p class="sub">CPC, arts. 771 a 925 · Prof. Caqui · Master5 OAB</p>
+<div class="stats">
+ <div class="srow">
+  <div class="st"><b id="sR">0</b><span>Respondidas</span></div>
+  <div class="st ok"><b id="sA">0</b><span>Acertos</span></div>
+  <div class="st no"><b id="sE">0</b><span>Erros</span></div>
+ </div>
+ <div class="bar"><i id="pb"></i></div>
+ <div class="ptxt" id="pt"></div>
+</div>
+<div class="nav" id="nv"></div>
+<div id="qs"></div>
+<div class="pager">
+ <button id="bp" onclick="go(cur-1)">← Anterior</button>
+ <span id="pi"></span>
+ <button id="bn" onclick="go(cur+1)">Próxima →</button>
+</div>
+<p class="foot">Material elaborado por Sabrine Arantes @sabrinedireito · Uso pessoal · Proibida a reprodução e o repasse · Lei 9.610/98</p>
+</div>
+<script>
+const QUESTOES = [
+ {
+  "num": 1,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Documento particular como título",
+  "enunciado": "Fernanda emprestou R$ 25.000,00 a Gilberto, que assinou um instrumento particular de confissão de dívida. Além das partes, ninguém mais assinou o documento, firmado em papel.",
+  "comando": "Para cobrar a dívida, assinale a afirmativa correta.",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "Fernanda pode ajuizar execução de título extrajudicial, pois a confissão de dívida é título executivo em qualquer caso.",
+   "B": "Fernanda só pode cobrar a dívida por ação de conhecimento pelo procedimento sumário.",
+   "C": "Fernanda pode ajuizar execução, desde que reconheça a firma do devedor em cartório.",
+   "D": "Fernanda não dispõe de título executivo extrajudicial, pois o documento particular precisa ser assinado pelo devedor e por 2 testemunhas."
+  },
+  "feedbacks": {
+   "A": "Errado: a Súmula 300 do STJ fala da confissão de dívida, mas o documento particular ainda precisa preencher o art. 784, III.",
+   "B": "Errado: o procedimento sumário não existe mais no CPC/2015; ela pode usar a monitória ou o procedimento comum.",
+   "C": "Errado: o reconhecimento de firma não substitui as testemunhas.",
+   "D": "Correto: art. 784, III; ela poderá usar ação monitória ou de cobrança."
+  },
+  "fundamento": "Art. 784, III: são títulos executivos extrajudiciais o documento particular assinado pelo devedor e por 2 testemunhas. Art. 700: a ação monitória pode ser proposta por aquele que afirmar, com base em prova escrita sem eficácia de título executivo, ter direito de exigir do devedor capaz o pagamento de quantia em dinheiro.",
+  "caqui": "Papel assinado só por credor e devedor é prova, não título. Para virar \"sentença de papel\", precisa das 2 testemunhas — ou, se for eletrônico, da assinatura com provedor que garanta a integridade."
+ },
+ {
+  "num": 2,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Título eletrônico sem testemunhas",
+  "enunciado": "A Fintech Alfa S/A celebrou contrato de empréstimo com Bruno, assinado eletronicamente por ele em plataforma de assinatura digital cujo provedor certifica a integridade do documento. Não houve assinatura de testemunhas.",
+  "comando": "Diante do inadimplemento, assinale a afirmativa correta.",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "O contrato só será título executivo se a assinatura for qualificada, com certificado ICP-Brasil.",
+   "B": "O contrato é título executivo judicial, por ter sido firmado eletronicamente.",
+   "C": "O contrato é título executivo extrajudicial, dispensada a assinatura de testemunhas quando a integridade for conferida por provedor de assinatura.",
+   "D": "O contrato não é título executivo, pois falta a assinatura de 2 testemunhas."
+  },
+  "feedbacks": {
+   "A": "Errado: a lei admite qualquer modalidade de assinatura eletrônica prevista em lei.",
+   "B": "Errado: título judicial é formado em processo judicial (art. 515).",
+   "C": "Correto: art. 784, § 4º.",
+   "D": "Errado: a Lei 14.620/2023 dispensou as testemunhas nesse caso."
+  },
+  "fundamento": "Art. 784, § 4º (Lei 14.620/2023): nos títulos executivos constituídos ou atestados por meio eletrônico, é admitida qualquer modalidade de assinatura eletrônica prevista em lei, dispensada a assinatura de testemunhas quando sua integridade for conferida por provedor de assinatura.",
+  "caqui": "O provedor de assinatura faz o papel das testemunhas: ele \"atesta\" que o documento não foi alterado depois de assinado."
+ },
+ {
+  "num": 3,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Contrato de abertura de crédito",
+  "enunciado": "O Banco Beta S/A ajuizou execução contra a cliente Carolina com base em contrato de abertura de crédito em conta-corrente (cheque especial), acompanhado dos extratos bancários.",
+  "comando": "Segundo o entendimento sumulado do STJ, assinale a afirmativa correta.",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "O contrato, acompanhado dos extratos, é título executivo extrajudicial.",
+   "B": "O contrato é título executivo judicial.",
+   "C": "O contrato é título executivo apenas se assinado por 2 testemunhas.",
+   "D": "O contrato de abertura de crédito, ainda que acompanhado de extrato, não é título executivo."
+  },
+  "feedbacks": {
+   "A": "Errado: a Súmula 233 do STJ afasta essa possibilidade.",
+   "B": "Errado: não há título judicial.",
+   "C": "Errado: mesmo com testemunhas, falta liquidez, pois o valor depende de lançamentos unilaterais do banco.",
+   "D": "Correto: Súmula 233 do STJ; o banco pode usar a ação monitória (Súmula 247 do STJ)."
+  },
+  "fundamento": "Súmula 233 do STJ: o contrato de abertura de crédito, ainda que acompanhado de extrato da conta-corrente, não é título executivo. Súmula 247 do STJ: o contrato de abertura de crédito em conta-corrente, acompanhado do demonstrativo de débito, constitui documento hábil para o ajuizamento da ação monitória. Súmula 300 do STJ: o instrumento de confissão de dívida, ainda que originário de contrato de abertura de crédito, constitui título executivo extrajudicial.",
+  "caqui": "No cheque especial, quem diz quanto se deve é o próprio banco, pelos extratos. Falta a liquidez certa do título. Se o cliente assinar uma confissão de dívida, aí sim surge o título."
+ },
+ {
+  "num": 4,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Contribuições condominiais",
+  "enunciado": "O Condomínio Edifício Ipê pretende cobrar de um condômino as contribuições ordinárias dos últimos 8 meses, aprovadas em assembleia e documentalmente comprovadas pela ata e pelos boletos.",
+  "comando": "O meio adequado é:",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "execução de título extrajudicial, pois o crédito de contribuições condominiais documentalmente comprovadas é título executivo.",
+   "B": "ação monitória, por falta de título executivo.",
+   "C": "ação de cobrança pelo procedimento comum, obrigatoriamente.",
+   "D": "cumprimento de sentença, pois a ata da assembleia equivale a decisão judicial."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 784, X.",
+   "B": "Errado: o CPC/2015 conferiu força executiva a esse crédito.",
+   "C": "Errado: o condomínio pode, mas não precisa, usar o procedimento comum (art. 785).",
+   "D": "Errado: ata de assembleia não é título judicial."
+  },
+  "fundamento": "Art. 784, X: é título executivo extrajudicial o crédito referente às contribuições ordinárias ou extraordinárias de condomínio edilício, previstas na respectiva convenção ou aprovadas em assembleia geral, desde que documentalmente comprovadas.",
+  "caqui": "Novidade do CPC/2015 que a banca adora: o condomínio \"pula\" a fase de conhecimento e já começa executando."
+ },
+ {
+  "num": 5,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Opção pelo processo de conhecimento",
+  "enunciado": "Hugo é credor de Isabela por nota promissória vencida e não paga. Por orientação de seu advogado, ajuizou ação de cobrança pelo procedimento comum. Isabela alegou, em preliminar, falta de interesse de agir, já que Hugo tinha título executivo.",
+  "comando": "A preliminar deve ser:",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "acolhida, pois quem tem título executivo não tem interesse em ação de conhecimento.",
+   "B": "acolhida, com conversão de ofício da ação em execução.",
+   "C": "rejeitada, pois a existência de título executivo extrajudicial não impede a parte de optar pelo processo de conhecimento.",
+   "D": "rejeitada apenas se Hugo desistir da nota promissória."
+  },
+  "feedbacks": {
+   "A": "Errado: o CPC/2015 superou essa tese.",
+   "B": "Errado: não há conversão de ofício.",
+   "C": "Correto: art. 785.",
+   "D": "Errado: não há essa exigência."
+  },
+  "fundamento": "Art. 785: a existência de título executivo extrajudicial não impede a parte de optar pelo processo de conhecimento, a fim de obter título executivo judicial.",
+  "caqui": "Ter o atalho não obriga a usá-lo. O credor pode preferir o caminho mais longo para obter uma sentença."
+ },
+ {
+  "num": 6,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Execução contra o fiador",
+  "enunciado": "João é fiador em contrato de locação residencial, que contém cláusula de renúncia ao benefício de ordem. O locador ajuizou execução dos aluguéis atrasados diretamente contra João.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "João pode exigir que primeiro sejam executados os bens do locatário, pois o benefício de ordem é irrenunciável.",
+   "B": "A execução contra o fiador exige prévia sentença condenatória em ação de conhecimento.",
+   "C": "O fiador só responde se o locatário for declarado insolvente.",
+   "D": "O fiador do débito constante de título extrajudicial pode ser executado e, tendo renunciado ao benefício de ordem, não pode exigir que primeiro sejam executados os bens do locatário."
+  },
+  "feedbacks": {
+   "A": "Errado: o benefício de ordem é renunciável.",
+   "B": "Errado: o contrato de locação, documentalmente comprovado, já é título extrajudicial (art. 784, VIII).",
+   "C": "Errado: não há essa condição.",
+   "D": "Correto: arts. 779, IV, e 794, § 3º."
+  },
+  "fundamento": "Art. 779, IV: a execução pode ser promovida contra o fiador do débito constante em título extrajudicial. Art. 794: o fiador, quando executado, tem o direito de exigir que primeiro sejam executados os bens do devedor situados na mesma comarca, livres e desembargados, indicando-os pormenorizadamente à penhora. § 3º: o disposto no caput não se aplica se o fiador houver renunciado ao benefício de ordem.",
+  "caqui": "O benefício de ordem é a \"vez na fila\": o fiador pede que cobrem primeiro o devedor. Mas, se ele abriu mão disso no contrato, entra direto na fila."
+ },
+ {
+  "num": 7,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Competência na execução",
+  "enunciado": "A Distribuidora Sul Ltda., com sede em Porto Alegre/RS, é credora de duas notas promissórias emitidas por Carlos, que reside em Florianópolis/SC, e por Daniela, que reside em Curitiba/PR, coobrigadas pela mesma dívida. Não há foro de eleição.",
+  "comando": "A execução poderá ser proposta:",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "obrigatoriamente em Porto Alegre, domicílio do exequente.",
+   "B": "no foro de qualquer dos executados.",
+   "C": "apenas em Florianópolis, domicílio do primeiro devedor indicado.",
+   "D": "obrigatoriamente em Brasília, por envolver devedores de Estados diferentes."
+  },
+  "feedbacks": {
+   "A": "Errado: o domicílio do exequente só é foro subsidiário quando o do executado for incerto (art. 781, III).",
+   "B": "Correto: art. 781, IV.",
+   "C": "Errado: a lei permite o foro de qualquer deles.",
+   "D": "Errado: não há essa regra."
+  },
+  "fundamento": "Art. 781: a execução pode ser proposta no foro de domicílio do executado, de eleição constante do título ou de situação dos bens a ela sujeitos; IV — havendo mais de um devedor, com diferentes domicílios, a execução será proposta no foro de qualquer deles, à escolha do exequente.",
+  "caqui": "Vários devedores em cidades diferentes? O credor escolhe a cidade de qualquer um deles."
+ },
+ {
+  "num": 8,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Atos atentatórios à dignidade da justiça",
+  "enunciado": "Intimado a indicar seus bens penhoráveis, o executado Marcelo permaneceu em silêncio, embora tivesse um veículo e aplicações financeiras em nome próprio.",
+  "comando": "A conduta de Marcelo:",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "configura crime de desobediência, com pena de multa revertida ao Estado.",
+   "B": "configura litigância de má-fé, com multa de até 1% do valor da causa.",
+   "C": "configura ato atentatório à dignidade da justiça, sujeito a multa de até 20% do valor atualizado do débito, revertida ao exequente.",
+   "D": "é lícita, pois ninguém é obrigado a produzir prova contra si."
+  },
+  "feedbacks": {
+   "A": "Errado: a sanção processual específica é a do art. 774, revertida ao exequente.",
+   "B": "Errado: a multa do art. 774 tem limite de 20% do débito.",
+   "C": "Correto: art. 774, V, e parágrafo único.",
+   "D": "Errado: o executado tem o dever de colaborar e indicar seus bens."
+  },
+  "fundamento": "Art. 774: considera-se atentatória à dignidade da justiça a conduta comissiva ou omissiva do executado que: V — intimado, não indica ao juiz quais são e onde estão os bens sujeitos à penhora e os respectivos valores, nem exibe prova de sua propriedade. Parágrafo único: o juiz fixará multa em montante não superior a 20% do valor atualizado do débito em execução, a qual será revertida em proveito do exequente.",
+  "caqui": "Esconder os bens é \"zombar\" da Justiça. A multa de até 20% vai para o credor, que é quem sofre com a demora."
+ },
+ {
+  "num": 9,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Desistência da execução",
+  "enunciado": "Após a oposição de embargos à execução em que o executado alegou pagamento parcial e excesso de execução, o exequente requereu a desistência da execução.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "A desistência depende da concordância do executado para a extinção da execução.",
+   "B": "Com a desistência, os embargos são automaticamente extintos, sem custas para o exequente.",
+   "C": "O exequente pode desistir da execução, mas a extinção dos embargos, por versarem sobre questões de mérito, depende da concordância do embargante.",
+   "D": "A desistência é vedada após a oposição de embargos."
+  },
+  "feedbacks": {
+   "A": "Errado: a desistência da execução é direito do exequente (art. 775, caput).",
+   "B": "Errado: a extinção automática só ocorre nos embargos sobre questões processuais, e o exequente paga custas e honorários (art. 775, par. único, I).",
+   "C": "Correto: art. 775, parágrafo único, II.",
+   "D": "Errado: a desistência é possível a qualquer tempo."
+  },
+  "fundamento": "Art. 775: o exequente tem o direito de desistir de toda ou de apenas alguma medida executiva. Parágrafo único: na desistência da execução, observar-se-á o seguinte: I — serão extintos a impugnação e os embargos que versarem apenas sobre questões processuais, pagando o exequente as custas processuais e os honorários advocatícios; II — nos demais casos, a extinção dependerá da concordância do impugnante ou do embargante.",
+  "caqui": "O executado que discutiu o mérito pode querer uma sentença que diga que ele não deve. Por isso, só os embargos de mérito dependem da concordância dele."
+ },
+ {
+  "num": 10,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Fraude à execução e Súmula 375",
+  "enunciado": "Durante execução de R$ 200.000,00, sem penhora registrada, o executado vendeu seu único imóvel a Rita, que pesquisou as certidões do vendedor apenas na comarca do imóvel, onde nada constava. A execução tramitava em outra comarca.",
+  "comando": "Para o reconhecimento da fraude à execução, segundo o STJ:",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "é necessário provar que o preço pago foi vil.",
+   "B": "é necessário o ajuizamento de ação pauliana.",
+   "C": "basta que a execução tramitasse ao tempo da venda, independentemente da boa-fé de Rita.",
+   "D": "é necessário o registro da penhora do bem alienado ou a prova da má-fé do terceiro adquirente."
+  },
+  "feedbacks": {
+   "A": "Errado: o preço vil pode ser indício, mas não é requisito.",
+   "B": "Errado: a ação pauliana é para a fraude contra credores.",
+   "C": "Errado: o STJ protege o terceiro de boa-fé.",
+   "D": "Correto: Súmula 375 do STJ."
+  },
+  "fundamento": "Súmula 375 do STJ: o reconhecimento da fraude à execução depende do registro da penhora do bem alienado ou da prova de má-fé do terceiro adquirente. Art. 792, § 4º: antes de declarar a fraude à execução, o juiz deverá intimar o terceiro adquirente, que, se quiser, poderá opor embargos de terceiro, no prazo de 15 dias.",
+  "caqui": "O registro da penhora é o \"aviso na porta\" do imóvel. Sem esse aviso, quem comprou de boa-fé é protegido, e o credor precisa provar que o comprador sabia da fraude."
+ },
+ {
+  "num": 11,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Fraude à execução x fraude contra credores",
+  "enunciado": "Antes de ser demandado por qualquer credor, Vicente doou seus imóveis aos filhos, ficando insolvente. Meses depois, um credor ajuizou execução contra ele.",
+  "comando": "Para atingir os imóveis doados, o credor deverá:",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "nada poderá fazer, pois a doação aos filhos é sempre válida.",
+   "B": "requerer a penhora direta dos imóveis, pois a doação é nula de pleno direito.",
+   "C": "ajuizar ação pauliana, por se tratar de fraude contra credores.",
+   "D": "alegar fraude à execução por simples petição nos autos da execução."
+  },
+  "feedbacks": {
+   "A": "Errado: a doação em fraude contra credores pode ser anulada.",
+   "B": "Errado: o negócio é anulável, e não nulo, e depende de ação própria.",
+   "C": "Correto: a doação anterior ao processo, que leva à insolvência, é fraude contra credores (arts. 158 e 161 do CC), reconhecida em ação autônoma.",
+   "D": "Errado: a fraude à execução pressupõe processo em curso ao tempo da alienação."
+  },
+  "fundamento": "Art. 158 do CC: os negócios de transmissão gratuita de bens ou remissão de dívida, se os praticar o devedor já insolvente, ou por eles reduzido à insolvência, poderão ser anulados pelos credores quirografários, como lesivos dos seus direitos. Art. 790, VI, do CPC: ficam sujeitos à execução os bens cuja alienação tenha sido anulada em razão do reconhecimento, em ação autônoma, de fraude contra credores.",
+  "caqui": "O relógio decide: sem processo em curso quando o bem saiu, é fraude contra credores (ação pauliana). Com processo em curso, é fraude à execução (petição nos autos)."
+ },
+ {
+  "num": 12,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Interrupção da prescrição",
+  "enunciado": "A execução de uma nota promissória foi proposta 2 dias antes de consumado o prazo prescricional. O juiz proferiu o despacho que ordenou a citação 20 dias depois, e o exequente adotou as providências para a citação no prazo legal.",
+  "comando": "Sobre a prescrição, assinale a afirmativa correta.",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "Ocorreu a prescrição, pois o despacho foi proferido após o prazo.",
+   "B": "Não ocorreu a prescrição, pois o despacho que ordena a citação interrompe a prescrição, retroagindo à data de propositura da ação.",
+   "C": "A prescrição só se interrompe com a efetiva penhora de bens.",
+   "D": "A prescrição só se interrompe com a juntada do mandado de citação cumprido."
+  },
+  "feedbacks": {
+   "A": "Errado: a interrupção retroage à data da propositura.",
+   "B": "Correto: art. 802 e parágrafo único.",
+   "C": "Errado: a interrupção decorre do despacho que ordena a citação.",
+   "D": "Errado: o marco é o despacho, com retroação."
+  },
+  "fundamento": "Art. 802: na execução, o despacho que ordena a citação, desde que realizada em observância ao disposto no § 2º do art. 240, interrompe a prescrição, ainda que proferido por juízo incompetente. Parágrafo único: a interrupção da prescrição retroagirá à data de propositura da ação.",
+  "caqui": "O credor não pode ser punido pela demora da máquina judiciária: o relógio da prescrição \"para\" na data em que ele bateu à porta do Judiciário."
+ },
+ {
+  "num": 13,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Nulidade da execução sem embargos",
+  "enunciado": "O executado verificou que a execução foi ajuizada com base em contrato cuja obrigação de pagar estava sujeita a condição suspensiva ainda não implementada. O prazo dos embargos já terminou.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "A nulidade da execução pode ser pronunciada pelo juiz, de ofício ou a requerimento, independentemente de embargos.",
+   "B": "Nada mais pode ser feito, pois a matéria só poderia ser alegada em embargos.",
+   "C": "O executado deve ajuizar ação rescisória.",
+   "D": "O executado deve aguardar a penhora para alegar a nulidade."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 803, III, e parágrafo único; o meio usual é a exceção de pré-executividade.",
+   "B": "Errado: as nulidades do art. 803 independem de embargos.",
+   "C": "Errado: não há decisão de mérito transitada a rescindir.",
+   "D": "Errado: não há essa exigência."
+  },
+  "fundamento": "Art. 803: é nula a execução se: I — o título executivo extrajudicial não corresponder a obrigação certa, líquida e exigível; II — o executado não for regularmente citado; III — for instaurada antes de se verificar a condição ou de ocorrer o termo. Parágrafo único: a nulidade será pronunciada pelo juiz, de ofício ou a requerimento da parte, independentemente de embargos à execução.",
+  "caqui": "Execução sem título exigível é um prédio sem fundação: o juiz pode derrubá-la a qualquer momento, sem que o executado precise embargar."
+ },
+ {
+  "num": 14,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Exceção de pré-executividade",
+  "enunciado": "Na execução de cheque, o executado percebeu, após o prazo dos embargos, que o título estava prescrito desde antes do ajuizamento, fato demonstrável apenas pelas datas constantes do próprio cheque.",
+  "comando": "O meio de defesa adequado é:",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "agravo de instrumento contra o despacho que ordenou a citação.",
+   "B": "nova oposição de embargos, com pedido de devolução do prazo.",
+   "C": "ação rescisória.",
+   "D": "exceção de pré-executividade, pois a prescrição é matéria conhecível de ofício que não demanda dilação probatória."
+  },
+  "feedbacks": {
+   "A": "Errado: o despacho de citação é irrecorrível e o prazo já passou.",
+   "B": "Errado: o prazo dos embargos é preclusivo.",
+   "C": "Errado: não há sentença de mérito transitada.",
+   "D": "Correto: Súmula 393 do STJ, aplicada também à execução civil."
+  },
+  "fundamento": "Súmula 393 do STJ: a exceção de pré-executividade é admissível na execução fiscal relativamente às matérias conhecíveis de ofício que não demandem dilação probatória. Art. 487, II: a prescrição pode ser reconhecida de ofício.",
+  "caqui": "A exceção de pré-executividade é uma \"petição de emergência\": serve para o que o juiz poderia ver sozinho, só olhando os autos, sem produzir prova."
+ },
+ {
+  "num": 15,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Citação e prazo para pagar",
+  "enunciado": "Ajuizada execução de nota promissória de R$ 40.000,00, o juiz recebeu a inicial e determinou a citação do executado.",
+  "comando": "Sobre o prazo para pagamento e os honorários, assinale a afirmativa correta.",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "O executado será citado para pagar em 3 dias; os honorários de 10% fixados no despacho serão reduzidos pela metade em caso de integral pagamento nesse prazo.",
+   "B": "O executado será citado para pagar em 5 dias, sem incidência de honorários se pagar no prazo.",
+   "C": "O executado será citado para pagar em 3 dias, e os honorários serão fixados apenas na sentença.",
+   "D": "O executado será intimado para pagar em 15 dias, sob pena de multa de 10% e honorários de 10%."
+  },
+  "feedbacks": {
+   "A": "Correto: arts. 827, § 1º, e 829.",
+   "B": "Errado: o prazo é de 3 dias, e os honorários caem pela metade, não desaparecem.",
+   "C": "Errado: os honorários são fixados de plano, no despacho inicial.",
+   "D": "Errado: essa é a regra do cumprimento de sentença (art. 523)."
+  },
+  "fundamento": "Art. 827: ao despachar a inicial, o juiz fixará, de plano, os honorários advocatícios de 10%, a serem pagos pelo executado. § 1º: no caso de integral pagamento no prazo de 3 dias, o valor dos honorários advocatícios será reduzido pela metade. Art. 829: o executado será citado para pagar a dívida no prazo de 3 dias, contado da citação.",
+  "caqui": "Na execução, o \"desconto\" é nos honorários: pague em 3 dias e os 10% viram 5%. Não confunda com os 15 dias e a multa do cumprimento de sentença."
+ },
+ {
+  "num": 16,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Elevação dos honorários",
+  "enunciado": "Em execução de título extrajudicial, o juiz fixou honorários de 10% no despacho inicial. O executado opôs embargos, que foram julgados improcedentes.",
+  "comando": "Sobre os honorários da execução, assinale a afirmativa correta.",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "Podem ser elevados até 20%, quando rejeitados os embargos à execução.",
+   "B": "São substituídos pela multa de 10% do art. 523.",
+   "C": "Devem ser reduzidos à metade, por ter havido defesa.",
+   "D": "Permanecem obrigatoriamente em 10%."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 827, § 2º.",
+   "B": "Errado: a multa do art. 523 é do cumprimento de sentença.",
+   "C": "Errado: a redução pela metade é para quem paga em 3 dias.",
+   "D": "Errado: a lei permite a majoração."
+  },
+  "fundamento": "Art. 827, § 2º: o valor dos honorários poderá ser elevado até 20%, quando rejeitados os embargos à execução, podendo a majoração, caso não opostos os embargos, ocorrer ao final do procedimento executivo, levando-se em conta o trabalho realizado pelo advogado do exequente.",
+  "caqui": "Os honorários funcionam como um termômetro do trabalho: pagou rápido, cai para 5%; resistiu e perdeu, pode subir até 20%."
+ },
+ {
+  "num": 17,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Arresto executivo",
+  "enunciado": "O oficial de justiça não localizou o executado no endereço indicado, mas encontrou, no local, um veículo registrado em nome dele.",
+  "comando": "Nessa situação, o oficial de justiça:",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "deve arrestar tantos bens quantos bastem para garantir a execução.",
+   "B": "deve devolver o mandado, aguardando nova indicação de endereço.",
+   "C": "deve citar o executado por edital imediatamente.",
+   "D": "deve penhorar o veículo, que fica desde logo em definitivo vinculado à execução."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 830.",
+   "B": "Errado: a lei determina o arresto.",
+   "C": "Errado: o oficial deve procurar o executado 2 vezes nos 10 dias seguintes e, havendo suspeita de ocultação, citar por hora certa (§ 1º).",
+   "D": "Errado: ainda não há penhora; o arresto só se converte em penhora após a citação e o prazo de pagamento (§ 3º)."
+  },
+  "fundamento": "Art. 830: se o oficial de justiça não encontrar o executado, arrestar-lhe-á tantos bens quantos bastem para garantir a execução. § 1º: nos 10 dias seguintes à efetivação do arresto, o oficial de justiça procurará o executado 2 vezes em dias distintos e, havendo suspeita de ocultação, realizará a citação com hora certa. § 3º: aperfeiçoada a citação e transcorrido o prazo de pagamento, o arresto converter-se-á em penhora, independentemente de termo.",
+  "caqui": "O arresto é uma \"pré-penhora\": segura o bem antes que o devedor que se esconde suma com ele."
+ },
+ {
+  "num": 18,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Averbação premonitória",
+  "enunciado": "Admitida a execução, o exequente obteve certidão e a averbou na matrícula do imóvel do executado. Uma semana depois, o executado vendeu o imóvel.",
+  "comando": "Sobre a venda, assinale a afirmativa correta.",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "A venda só pode ser questionada por ação pauliana.",
+   "B": "A venda é válida e eficaz, pois ainda não havia penhora.",
+   "C": "A venda é nula, devendo o comprador ser processado criminalmente.",
+   "D": "Presume-se em fraude à execução a alienação efetuada após a averbação."
+  },
+  "feedbacks": {
+   "A": "Errado: a ação pauliana é para fraude contra credores.",
+   "B": "Errado: a averbação premonitória já gera a presunção de fraude.",
+   "C": "Errado: a consequência é a ineficácia perante o exequente, e não a nulidade.",
+   "D": "Correto: art. 828, § 4º."
+  },
+  "fundamento": "Art. 828: o exequente poderá obter certidão de que a execução foi admitida pelo juiz, para fins de averbação no registro de imóveis, de veículos ou de outros bens sujeitos a penhora, arresto ou indisponibilidade. § 4º: presume-se em fraude à execução a alienação ou a oneração de bens efetuada após a averbação.",
+  "caqui": "A averbação premonitória é o \"aviso na porta\" antes mesmo da penhora: quem comprou depois não pode dizer que não sabia."
+ },
+ {
+  "num": 19,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Impenhorabilidade do salário",
+  "enunciado": "Em execução de dívida de natureza não alimentar, foi determinada a penhora de 15% do salário mensal líquido de R$ 25.000,00 do executado, preservado valor suficiente à sua subsistência e à de sua família.",
+  "comando": "Segundo o CPC e a jurisprudência da Corte Especial do STJ, a penhora:",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "é possível apenas para pagamento de dívida tributária.",
+   "B": "é possível apenas sobre o que exceder 40 salários-mínimos.",
+   "C": "é vedada em qualquer hipótese, pois o salário é absolutamente impenhorável.",
+   "D": "é possível, excepcionalmente, desde que preservado o mínimo existencial do devedor e de sua família."
+  },
+  "feedbacks": {
+   "A": "Errado: não há essa restrição.",
+   "B": "Errado: o limite legal do § 2º é de 50 salários-mínimos, e o STJ admite exceções mesmo abaixo dele.",
+   "C": "Errado: o STJ relativizou a impenhorabilidade do salário.",
+   "D": "Correto: EREsp 1.874.222/DF (Corte Especial, 2023), interpretando o art. 833, IV e § 2º."
+  },
+  "fundamento": "Art. 833, IV: são impenhoráveis os salários. § 2º: o disposto no inciso IV não se aplica à penhora para pagamento de prestação alimentícia, independentemente de sua origem, bem como às importâncias excedentes a 50 salários-mínimos mensais. STJ, Corte Especial, EREsp 1.874.222/DF: em caráter excepcional, admite-se a penhora de parte do salário para dívida não alimentar, mesmo abaixo de 50 salários-mínimos, desde que preservado o mínimo existencial.",
+  "caqui": "O salário é protegido para garantir a vida digna do devedor, não para blindar quem pode pagar. Se sobra para viver bem, uma parte pode pagar a dívida."
+ },
+ {
+  "num": 20,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Penhora para pagar alimentos",
+  "enunciado": "Em execução de pensão alimentícia, o exequente requereu a penhora de valores mantidos pelo executado em caderneta de poupança, no total equivalente a 30 salários-mínimos.",
+  "comando": "A penhora:",
+  "gabarito": "D",
+  "alternativas": {
+   "A": "é vedada, pois a poupança é impenhorável até 40 salários-mínimos.",
+   "B": "depende de concordância do executado.",
+   "C": "é possível apenas sobre o que exceder 20 salários-mínimos.",
+   "D": "é possível, pois a impenhorabilidade da poupança não se aplica à penhora para pagamento de prestação alimentícia."
+  },
+  "feedbacks": {
+   "A": "Errado: a exceção do § 2º afasta a impenhorabilidade para alimentos.",
+   "B": "Errado: não há essa exigência.",
+   "C": "Errado: não há esse limite.",
+   "D": "Correto: art. 833, X e § 2º."
+  },
+  "fundamento": "Art. 833, X: é impenhorável a quantia depositada em caderneta de poupança, até o limite de 40 salários-mínimos. § 2º: o disposto nos incisos IV e X não se aplica à hipótese de penhora para pagamento de prestação alimentícia, independentemente de sua origem.",
+  "caqui": "Entre a poupança do devedor e a comida do filho, a lei escolhe a comida."
+ },
+ {
+  "num": 21,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Dívida do próprio bem",
+  "enunciado": "Mauro, professor, comprou a prazo, numa loja, os computadores que usa para dar aulas on-line e não pagou as prestações. A loja, com título executivo, pediu a penhora dos computadores.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "A impenhorabilidade não é oponível à execução de dívida relativa ao próprio bem, inclusive àquela contraída para sua aquisição.",
+   "B": "A penhora depende de autorização do sindicato dos professores.",
+   "C": "Os computadores são impenhoráveis, por serem instrumentos necessários ao exercício da profissão.",
+   "D": "Os computadores só podem ser penhorados se Mauro tiver outros bens."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 833, § 1º.",
+   "B": "Errado: não há essa exigência.",
+   "C": "Errado: a regra geral do inciso V cede diante do § 1º.",
+   "D": "Errado: não há essa condição."
+  },
+  "fundamento": "Art. 833, V: são impenhoráveis os livros, as máquinas, as ferramentas, os utensílios, os instrumentos ou outros bens móveis necessários ou úteis ao exercício da profissão do executado. § 1º: a impenhorabilidade não é oponível à execução de dívida relativa ao próprio bem, inclusive àquela contraída para sua aquisição.",
+  "caqui": "Não dá para comprar sem pagar e depois dizer que o bem é \"intocável\". A proteção não vale contra quem vendeu o próprio bem."
+ },
+ {
+  "num": 22,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Impenhorabilidade não é de ordem pública",
+  "enunciado": "Foi bloqueado, via SISBAJUD, o valor equivalente a 20 salários-mínimos na conta-corrente do executado. O executado não se manifestou no prazo de 5 dias, e o juiz, de ofício, determinou o desbloqueio por se tratar de quantia impenhorável.",
+  "comando": "Segundo o STJ (Tema 1.235), a decisão do juiz:",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "está correta, pois a impenhorabilidade é matéria de ordem pública.",
+   "B": "está incorreta, pois a impenhorabilidade de até 40 salários-mínimos não é matéria de ordem pública e não pode ser reconhecida de ofício.",
+   "C": "está correta, pois o juiz deve sempre proteger o executado.",
+   "D": "está incorreta, pois valores em conta-corrente nunca são impenhoráveis."
+  },
+  "feedbacks": {
+   "A": "Errado: o STJ afastou a natureza de ordem pública.",
+   "B": "Correto: Tema 1.235 do STJ; cabe ao executado alegar na primeira oportunidade, sob pena de preclusão.",
+   "C": "Errado: o juiz deve observar a tese repetitiva.",
+   "D": "Errado: o STJ estende a proteção a valores de até 40 SM em conta ou aplicações."
+  },
+  "fundamento": "STJ, Tema 1.235 (Corte Especial, 2024): a impenhorabilidade de quantia inferior a 40 salários-mínimos não é matéria de ordem pública e não pode ser reconhecida de ofício pelo juiz, devendo ser arguida pelo executado no primeiro momento em que lhe couber falar nos autos ou em sede de embargos à execução ou impugnação ao cumprimento de sentença, sob pena de preclusão. Art. 854, § 3º: incumbe ao executado, no prazo de 5 dias, comprovar que as quantias tornadas indisponíveis são impenhoráveis.",
+  "caqui": "A proteção existe, mas quem tem que \"levantar a mão\" é o executado. Se ele fica calado, o juiz não pode falar por ele."
+ },
+ {
+  "num": 23,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Bem de família do fiador",
+  "enunciado": "Lauro é fiador em contrato de locação comercial de uma loja. Executado pelos aluguéis não pagos, alega que seu único imóvel, onde mora com a família, é bem de família impenhorável.",
+  "comando": "Segundo o STJ e o STF, assinale a afirmativa correta.",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "O imóvel é impenhorável, pois a exceção da fiança só vale para a locação residencial.",
+   "B": "É válida a penhora do bem de família do fiador de contrato de locação, inclusive comercial.",
+   "C": "O imóvel só pode ser penhorado se o locatário também tiver bem de família.",
+   "D": "O imóvel só pode ser penhorado se o fiador tiver renunciado expressamente à proteção."
+  },
+  "feedbacks": {
+   "A": "Errado: o STF, no Tema 1.127, estendeu a constitucionalidade à locação comercial.",
+   "B": "Correto: Súmula 549 do STJ e Tema 1.127 do STF.",
+   "C": "Errado: não há essa condição.",
+   "D": "Errado: a exceção decorre da lei (art. 3º, VII, Lei 8.009/90)."
+  },
+  "fundamento": "Lei 8.009/90, art. 3º, VII: a impenhorabilidade é oponível em qualquer processo, salvo se movido por obrigação decorrente de fiança concedida em contrato de locação. Súmula 549 do STJ: é válida a penhora de bem de família pertencente a fiador de contrato de locação. STF, Tema 1.127: é constitucional a penhora de bem de família pertencente a fiador de contrato de locação, seja residencial, seja comercial.",
+  "caqui": "Quem assina como fiador de aluguel coloca a própria casa em jogo. É uma das exceções mais cobradas do bem de família."
+ },
+ {
+  "num": 24,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Ordem de preferência da penhora",
+  "enunciado": "Em execução de R$ 100.000,00, o executado ofereceu à penhora um terreno avaliado em R$ 150.000,00. O exequente recusou e pediu a penhora de dinheiro em aplicação financeira do executado, no valor de R$ 120.000,00.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "Deve prevalecer o terreno, por ser de maior valor.",
+   "B": "Deve prevalecer a penhora em dinheiro, que é prioritária.",
+   "C": "O juiz deve penhorar ambos, para garantir a execução.",
+   "D": "A escolha do bem é sempre do executado, pelo princípio da menor onerosidade."
+  },
+  "feedbacks": {
+   "A": "Errado: o valor maior não altera a prioridade legal.",
+   "B": "Correto: art. 835, I e § 1º.",
+   "C": "Errado: a penhora recai sobre tantos bens quantos bastem (art. 831).",
+   "D": "Errado: a menor onerosidade não afasta a prioridade do dinheiro; o executado deve indicar meio igualmente eficaz (art. 805, par. único)."
+  },
+  "fundamento": "Art. 835: a penhora observará, preferencialmente, a seguinte ordem: I — dinheiro, em espécie ou em depósito ou aplicação em instituição financeira; (...) V — bens imóveis. § 1º: é prioritária a penhora em dinheiro, podendo o juiz, nas demais hipóteses, alterar a ordem prevista no caput de acordo com as circunstâncias do caso concreto.",
+  "caqui": "Dinheiro é o bem mais \"líquido\": não precisa avaliar, anunciar nem leiloar. Por isso fica em primeiro lugar."
+ },
+ {
+  "num": 25,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Seguro garantia",
+  "enunciado": "Penhorado dinheiro em conta da empresa executada, ela requereu a substituição da penhora por seguro garantia judicial no valor exato do débito constante da inicial.",
+  "comando": "O pedido deve ser:",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "indeferido, pois a penhora de dinheiro nunca pode ser substituída.",
+   "B": "deferido, independentemente de concordância do exequente, pois a substituição é direito potestativo.",
+   "C": "indeferido, pois o seguro garantia só se equipara a dinheiro se em valor não inferior ao do débito acrescido de 30%.",
+   "D": "deferido, pois o seguro garantia equivale a dinheiro em qualquer valor."
+  },
+  "feedbacks": {
+   "A": "Errado: a substituição é possível com fiança bancária ou seguro garantia no valor legal.",
+   "B": "Errado: o valor oferecido é insuficiente.",
+   "C": "Correto: art. 835, § 2º.",
+   "D": "Errado: a lei exige o acréscimo de 30%."
+  },
+  "fundamento": "Art. 835, § 2º: para fins de substituição da penhora, equiparam-se a dinheiro a fiança bancária e o seguro garantia judicial, desde que em valor não inferior ao do débito constante da inicial, acrescido de 30%.",
+  "caqui": "O seguro só \"vale dinheiro\" se vier com uma folga de 30%, para cobrir juros, correção e despesas até o fim da execução."
+ },
+ {
+  "num": 26,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Adjudicação",
+  "enunciado": "Penhorado e avaliado em R$ 300.000,00 o imóvel do executado, o exequente, credor de R$ 250.000,00, pretende adjudicá-lo.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "O exequente pode adjudicar oferecendo preço não inferior ao da avaliação, depositando de imediato a diferença de R$ 50.000,00.",
+   "B": "A adjudicação é vedada ao exequente, sendo privativa dos familiares do executado.",
+   "C": "A adjudicação só é possível após leilão frustrado.",
+   "D": "O exequente pode adjudicar o imóvel por R$ 250.000,00, valor de seu crédito."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 876, caput e § 4º, I.",
+   "B": "Errado: o exequente é o primeiro legitimado.",
+   "C": "Errado: a adjudicação é a primeira via de expropriação.",
+   "D": "Errado: o preço não pode ser inferior à avaliação."
+  },
+  "fundamento": "Art. 876: é lícito ao exequente, oferecendo preço não inferior ao da avaliação, requerer que lhe sejam adjudicados os bens penhorados. § 4º: se o valor do crédito for: I — inferior ao dos bens, o requerente da adjudicação depositará de imediato a diferença, que ficará à disposição do executado; II — superior ao dos bens, a execução prosseguirá pelo saldo remanescente.",
+  "caqui": "Adjudicar é o credor \"ficar com o bem\" em vez de receber dinheiro. Mas ele paga o preço justo: se o bem vale mais que a dívida, deposita a diferença."
+ },
+ {
+  "num": 27,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Preço vil",
+  "enunciado": "Um imóvel avaliado em R$ 500.000,00 foi levado a leilão eletrônico, sem que o juiz tivesse fixado preço mínimo no edital. O maior lance foi de R$ 240.000,00.",
+  "comando": "O lance:",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "deve ser aceito, pois só é vil o preço inferior a 30% da avaliação.",
+   "B": "não deve ser aceito, pois é vil o preço inferior a 50% do valor da avaliação quando não houver preço mínimo fixado.",
+   "C": "deve ser aceito, pois no leilão vale o maior lance.",
+   "D": "deve ser aceito, desde que o executado concorde."
+  },
+  "feedbacks": {
+   "A": "Errado: o parâmetro legal é de 50%.",
+   "B": "Correto: art. 891, parágrafo único (50% de R$ 500 mil = R$ 250 mil).",
+   "C": "Errado: a lei veda o preço vil.",
+   "D": "Errado: a concordância do executado não está prevista."
+  },
+  "fundamento": "Art. 891: não será aceito lance que ofereça preço vil. Parágrafo único: considera-se vil o preço inferior ao mínimo estipulado pelo juiz e constante do edital, e, não tendo sido fixado preço mínimo, considera-se vil o preço inferior a 50% do valor da avaliação.",
+  "caqui": "O leilão não pode virar \"queima de estoque\" do patrimônio do devedor: sem preço mínimo no edital, abaixo da metade da avaliação não vale."
+ },
+ {
+  "num": 28,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Prazo dos embargos e litisconsórcio",
+  "enunciado": "Em execução contra três devedores solidários, não casados entre si e representados por advogados de escritórios diferentes, os mandados de citação foram juntados em datas diferentes.",
+  "comando": "Sobre o prazo para embargar, assinale a afirmativa correta.",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "O prazo é de 30 dias, por haver litisconsórcio.",
+   "B": "O prazo de cada executado conta-se da juntada do respectivo comprovante de citação, sem aplicação do prazo em dobro.",
+   "C": "O prazo é de 15 dias para todos, contado da juntada do último mandado, e em dobro por haver advogados diferentes.",
+   "D": "O prazo só começa após a penhora de bens de todos os executados."
+  },
+  "feedbacks": {
+   "A": "Errado: o prazo é de 15 dias.",
+   "B": "Correto: art. 915, §§ 1º e 3º.",
+   "C": "Errado: a contagem é individual e não há prazo em dobro (art. 915, §§ 1º e 3º).",
+   "D": "Errado: os embargos independem de penhora."
+  },
+  "fundamento": "Art. 915: os embargos serão oferecidos no prazo de 15 dias, contado, conforme o caso, na forma do art. 231. § 1º: quando houver mais de um executado, o prazo para cada um deles embargar conta-se a partir da juntada do respectivo comprovante da citação, salvo no caso de cônjuges ou de companheiros, quando será contado a partir da juntada do último. § 3º: em relação ao cálculo dos prazos, não se aplica o disposto no art. 229.",
+  "caqui": "Na execução, cada devedor tem o seu relógio — exceto marido e mulher (ou companheiros), que começam a contar juntos, a partir do último. E não há prazo em dobro."
+ },
+ {
+  "num": 29,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Embargos — garantia e matérias",
+  "enunciado": "Citado em execução de contrato particular assinado por 2 testemunhas, o executado pretende alegar, em embargos, que o contrato foi celebrado sob coação. Ainda não houve penhora.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "A coação não pode ser alegada em embargos, por ser matéria anterior ao título.",
+   "B": "Os embargos devem ser apresentados nos próprios autos da execução.",
+   "C": "O executado pode embargar independentemente de penhora e alegar qualquer matéria que lhe seria lícito deduzir como defesa no processo de conhecimento.",
+   "D": "O executado só pode embargar depois de garantido o juízo pela penhora."
+  },
+  "feedbacks": {
+   "A": "Errado: no título extrajudicial, a defesa é ampla.",
+   "B": "Errado: os embargos são autuados em apartado e distribuídos por dependência (art. 914, § 1º).",
+   "C": "Correto: arts. 914 e 917, VI.",
+   "D": "Errado: os embargos independem de penhora, depósito ou caução (art. 914)."
+  },
+  "fundamento": "Art. 914: o executado, independentemente de penhora, depósito ou caução, poderá se opor à execução por meio de embargos. § 1º: os embargos à execução serão distribuídos por dependência, autuados em apartado. Art. 917, VI: nos embargos, o executado poderá alegar qualquer matéria que lhe seria lícito deduzir como defesa em processo de conhecimento.",
+  "caqui": "No título extrajudicial, nenhum juiz jamais analisou a dívida. Por isso os embargos são amplos: dá para discutir tudo, inclusive vícios do contrato."
+ },
+ {
+  "num": 30,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Efeito suspensivo dos embargos",
+  "enunciado": "O executado opôs embargos tempestivos e requereu a suspensão da execução, alegando apenas que a penhora de seus bens lhe causaria prejuízo. Não há penhora nem garantia nos autos.",
+  "comando": "O juiz deve:",
+  "gabarito": "C",
+  "alternativas": {
+   "A": "rejeitar liminarmente os embargos.",
+   "B": "suspender a execução de ofício, para evitar prejuízo ao executado.",
+   "C": "indeferir o efeito suspensivo, pois este exige os requisitos da tutela provisória e a garantia da execução por penhora, depósito ou caução suficientes.",
+   "D": "suspender a execução, pois os embargos têm efeito suspensivo automático."
+  },
+  "feedbacks": {
+   "A": "Errado: a ausência de garantia não autoriza a rejeição liminar dos embargos.",
+   "B": "Errado: a concessão depende de requerimento e dos requisitos legais.",
+   "C": "Correto: art. 919, § 1º.",
+   "D": "Errado: a regra é a ausência de efeito suspensivo (art. 919)."
+  },
+  "fundamento": "Art. 919: os embargos à execução não terão efeito suspensivo. § 1º: o juiz poderá, a requerimento do embargante, atribuir efeito suspensivo aos embargos quando verificados os requisitos para a concessão da tutela provisória e desde que a execução já esteja garantida por penhora, depósito ou caução suficientes.",
+  "caqui": "Embargar não freia a execução. Para frear, o executado precisa garantir o juízo e mostrar probabilidade do direito e perigo da demora."
+ },
+ {
+  "num": 31,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Parcelamento do art. 916",
+  "enunciado": "Citada em execução de R$ 50.000,00, Sônia reconheceu o débito e, no prazo dos embargos, depositou 30% do valor, com custas e honorários, requerendo o parcelamento do restante. Dias depois, opôs embargos alegando excesso de execução.",
+  "comando": "Assinale a afirmativa correta.",
+  "gabarito": "B",
+  "alternativas": {
+   "A": "Os embargos devem ser processados normalmente, pois o parcelamento não impede a defesa.",
+   "B": "A opção pelo parcelamento importa renúncia ao direito de opor embargos.",
+   "C": "O parcelamento é de até 12 parcelas mensais, sem juros.",
+   "D": "O parcelamento também poderia ser requerido no cumprimento de sentença."
+  },
+  "feedbacks": {
+   "A": "Errado: a lei é expressa sobre a renúncia.",
+   "B": "Correto: art. 916, § 6º.",
+   "C": "Errado: são até 6 parcelas mensais, com correção e juros de 1% ao mês.",
+   "D": "Errado: o parcelamento não se aplica ao cumprimento de sentença (§ 7º)."
+  },
+  "fundamento": "Art. 916: no prazo para embargos, reconhecendo o crédito do exequente e comprovando o depósito de 30% do valor em execução, acrescido de custas e de honorários de advogado, o executado poderá requerer que lhe seja permitido pagar o restante em até 6 parcelas mensais, acrescidas de correção monetária e de juros de 1% ao mês. § 6º: a opção pelo parcelamento de que trata este artigo importa renúncia ao direito de opor embargos. § 7º: o disposto neste artigo não se aplica ao cumprimento da sentença.",
+  "caqui": "Pedir parcelamento é dizer \"eu devo, só preciso de prazo\". Depois disso, não dá para voltar atrás e dizer que não deve."
+ },
+ {
+  "num": 32,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Prescrição intercorrente",
+  "enunciado": "Em execução de nota promissória, a primeira tentativa de localizar bens penhoráveis foi infrutífera, e o exequente teve ciência desse resultado. Passado o prazo de suspensão e decorrido o prazo prescricional sem nenhuma constrição efetiva, o juiz, ouvidas as partes, reconheceu de ofício a prescrição.",
+  "comando": "A decisão está:",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "correta, pois o termo inicial da prescrição intercorrente é a ciência da primeira tentativa infrutífera de localização de bens, e o juiz pode reconhecê-la de ofício, ouvidas as partes, sem ônus para elas.",
+   "B": "incorreta, pois a prescrição intercorrente só pode ser reconhecida a requerimento do executado.",
+   "C": "incorreta, pois o prazo da prescrição intercorrente só começa após o arquivamento definitivo dos autos.",
+   "D": "correta, mas o exequente deve ser condenado em honorários."
+  },
+  "feedbacks": {
+   "A": "Correto: art. 921, §§ 4º e 5º (Lei 14.195/2021).",
+   "B": "Errado: o art. 921, § 5º, autoriza o reconhecimento de ofício.",
+   "C": "Errado: o marco é a ciência da primeira tentativa infrutífera.",
+   "D": "Errado: a extinção se dá sem ônus para as partes."
+  },
+  "fundamento": "Art. 921, § 4º: o termo inicial da prescrição no curso do processo será a ciência da primeira tentativa infrutífera de localização do devedor ou de bens penhoráveis, e será suspensa, por uma única vez, pelo prazo máximo previsto no § 1º (1 ano). § 5º: o juiz, depois de ouvidas as partes, no prazo de 15 dias, poderá, de ofício, reconhecer a prescrição intercorrente e extinguir o processo, sem ônus para as partes.",
+  "caqui": "A execução não pode ficar \"pendurada\" para sempre. O relógio começa na primeira busca frustrada, pausa uma única vez por 1 ano e depois corre até o fim do prazo."
+ },
+ {
+  "num": 33,
+  "exame": "Inédita — estilo FGV",
+  "titulo": "Extinção da execução",
+  "enunciado": "O executado pagou integralmente o débito, com juros, custas e honorários. O exequente deu quitação nos autos.",
+  "comando": "Sobre a extinção da execução, assinale a afirmativa correta.",
+  "gabarito": "A",
+  "alternativas": {
+   "A": "A extinção só produz efeito quando declarada por sentença.",
+   "B": "A execução extingue-se automaticamente com o pagamento, sem necessidade de pronunciamento judicial.",
+   "C": "A extinção depende de nova citação do executado.",
+   "D": "O exequente deve propor ação declaratória de quitação."
+  },
+  "feedbacks": {
+   "A": "Correto: arts. 924, II, e 925.",
+   "B": "Errado: a lei exige sentença.",
+   "C": "Errado: não há essa exigência.",
+   "D": "Errado: a extinção se dá nos próprios autos."
+  },
+  "fundamento": "Art. 924: extingue-se a execução quando: I — a petição inicial for indeferida; II — a obrigação for satisfeita; III — o executado obtiver, por qualquer outro meio, a extinção total da dívida; IV — o exequente renunciar ao crédito; V — ocorrer a prescrição intercorrente. Art. 925: a extinção só produz efeito quando declarada por sentença.",
+  "caqui": "Pagou, mas só \"acaba\" de verdade quando o juiz assina a sentença de extinção — que é o documento que prova o fim da execução."
+ }
+];
+let cur = 0;
+const st = {};
+function cl(s){return esc(s.replace(/^(Correto|Errado):\s*/,'').replace(/^./,c=>c.toUpperCase()));}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function init(){
+  const nv=document.getElementById('nv'), qs=document.getElementById('qs');
+  QUESTOES.forEach((q,i)=>{
+    const b=document.createElement('button'); b.textContent=q.num; b.onclick=()=>go(i); nv.appendChild(b);
+    qs.appendChild(bc(q,i));
+  });
+  go(0); us();
+}
+function bc(q,i){
+  const d=document.createElement('div'); d.className='qc'; d.id='q'+i;
+  let h='<div class="qh"><span class="qtag">Questão '+q.num+'</span><span class="qex">'+esc(q.exame)+'</span></div>';
+  h+='<div class="qt">'+esc(q.titulo)+'</div>';
+  h+='<div class="en">'+esc(q.enunciado)+'</div><div class="cm">'+esc(q.comando)+'</div>';
+  ['A','B','C','D'].forEach(l=>{
+    h+='<button class="alt" data-l="'+l+'" onclick="resp('+i+',\''+l+'\')"><span class="lt">'+l+'</span><span>'+esc(q.alternativas[l])+'</span></button>';
+  });
+  h+='<div class="fb" id="fb'+i+'"></div>';
+  h+='<div class="acts" id="ac'+i+'"><button class="b1" onclick="tF('+i+')">Ver fundamento legal</button>';
+  h+='<button class="b2" onclick="tX('+i+')">Explicação do Prof. Caqui</button>';
+  h+='<button class="b3" onclick="rst('+i+')">↺ Tentar novamente</button>';
+  h+='<span class="gab">Gabarito: <b>'+q.gabarito+'</b></span></div>';
+  h+='<div class="fu" id="fu'+i+'"><h4>📖 Fundamento legal</h4>'+esc(q.fundamento)+'</div>';
+  h+='<div class="ca" id="ca'+i+'"><h4>🍊 Explicação didática do Professor Caqui</h4>'+esc(q.caqui)+'</div>';
+  d.innerHTML=h; return d;
+}
+function resp(i,l){
+  if(st[i]) return;
+  const q=QUESTOES[i], ok=l===q.gabarito; st[i]=ok?'ok':'no';
+  document.querySelectorAll('#q'+i+' .alt').forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.l===q.gabarito) b.classList.add('cor');
+    else if(b.dataset.l===l) b.classList.add('err');
+  });
+  const fb=document.getElementById('fb'+i);
+  fb.className='fb '+(ok?'ok':'no');
+  fb.innerHTML=(ok?'<b>✓ Correto!</b> ':'<b>✗ Incorreto.</b> ')+cl(q.feedbacks[l])+(ok?'':' <br><b>Gabarito: '+q.gabarito+'</b> — '+cl(q.feedbacks[q.gabarito]));
+  document.getElementById('ac'+i).classList.add('on');
+  nav(); us();
+}
+function tF(i){document.getElementById('fu'+i).classList.toggle('on');}
+function tX(i){document.getElementById('ca'+i).classList.toggle('on');}
+function rst(i){
+  delete st[i];
+  document.querySelectorAll('#q'+i+' .alt').forEach(b=>{b.disabled=false;b.classList.remove('cor','err');});
+  document.getElementById('fb'+i).className='fb';
+  document.getElementById('ac'+i).classList.remove('on');
+  document.getElementById('fu'+i).classList.remove('on');
+  document.getElementById('ca'+i).classList.remove('on');
+  nav(); us();
+}
+function go(i){
+  if(i<0||i>=QUESTOES.length) return;
+  document.querySelectorAll('.qc').forEach(e=>e.classList.remove('vis'));
+  document.getElementById('q'+i).classList.add('vis');
+  cur=i; nav(); upd();
+}
+function nav(){
+  document.querySelectorAll('#nv button').forEach((b,i)=>{
+    b.className=(i===cur?'act ':'')+(st[i]||'');
+  });
+}
+function upd(){
+  document.getElementById('pi').textContent=(cur+1)+' de '+QUESTOES.length;
+  document.getElementById('bp').disabled=cur===0;
+  document.getElementById('bn').disabled=cur===QUESTOES.length-1;
+}
+function us(){
+  const v=Object.values(st), a=v.filter(x=>x==='ok').length, n=QUESTOES.length;
+  document.getElementById('sR').textContent=v.length;
+  document.getElementById('sA').textContent=a;
+  document.getElementById('sE').textContent=v.length-a;
+  document.getElementById('pb').style.width=(v.length/n*100)+'%';
+  document.getElementById('pt').textContent=v.length+' de '+n+' respondidas';
+}
+init();
+</script>
+</body>
+</html>
